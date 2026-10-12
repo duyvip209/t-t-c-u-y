@@ -1,12 +1,704 @@
---[[
- .____                  ________ ___.    _____                           __                
- |    |    __ _______   \_____  \\_ |___/ ____\_ __  ______ ____ _____ _/  |_  ___________ 
- |    |   |  |  \__  \   /   |   \| __ \   __\  |  \/  ___// ___\\__  \\   __\/  _ \_  __ \
- |    |___|  |  // __ \_/    |    \ \_\ \  | |  |  /\___ \\  \___ / __ \|  | (  <_> )  | \/
- |_______ \____/(____  /\_______  /___  /__| |____//____  >\___  >____  /__|  \____/|__|   
-         \/          \/         \/    \/                \/     \/     \/                   
-          \_Welcome to LuaObfuscator.com   (Alpha 0.10.9) ~  Much Love, Ferib 
+local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Player = game:GetService("Players").LocalPlayer
+local ConfigFileName = "DYUHUB_Event_" .. game.PlaceId .. "_" .. Player.UserId .. ".json"
 
-]]--
+local EventSettings = {
+    AutoHatchWarBossTap = false,
+    AutoEgg = false,
+    AutoJump = false,
+    AutoUnlock = false,
+    AutoKnockHouse = false,
+}
 
-local v0=game:GetService("HttpService");local v1=game:GetService("ReplicatedStorage");local v2=game:GetService("Players").LocalPlayer;local v3="DYUHUB_Event_"   .. game.PlaceId   .. "_"   .. v2.UserId   .. ".json" ;local v4={AutoHatchWarBossTap=false,AutoEgg=false,AutoJump=false,AutoUnlock=false,AutoKnockHouse=false};local function v5() if (type(writefile)~="function") then return false;end local v40=pcall(function() writefile(v3,v0:JSONEncode(v4));end);return v40;end local function v6() local v41=1409 -(450 + 959) ;local v42;local v43;local v44;local v45;while true do if (v41==(1992 -(582 + 1408))) then v44,v45=pcall(function() return v0:JSONDecode(readfile(v3));end);if ( not v44 or (type(v45)~="table")) then return;end v41=10 -7 ;end if (v41==(0 -0)) then if ((type(isfile)~="function") or (type(readfile)~="function")) then return;end v42,v43=pcall(function() return isfile(v3);end);v41=1;end if (v41==(11 -8)) then for v121,v122 in pairs(v45) do if ((v4[v121]~=nil) and (type(v122)==type(v4[v121]))) then v4[v121]=v122;end end break;end if (v41==1) then if  not v42 then return;end if  not v43 then local v153=1824 -(1195 + 629) ;while true do if (v153==(0 -0)) then v5();return;end end end v41=243 -(187 + 54) ;end end end v6();v6();local v7=false;local v8="https://raw.githubusercontent.com/duyvip453/dyu-Hub/refs/heads/main/backgroud.lua?v="   .. math.random(1,100000) ;local v9,v10=pcall(function() return game:HttpGet(v8);end);if ( not v9 or (type(v10)~="string") or (v10=="")) then return;end local v11=loadstring(v10);if (type(v11)~="function") then return;end local v12,v13=pcall(v11);if ( not v12 or (type(v13)~="table") or (type(v13.Init)~="function")) then return;end local v14,v15=pcall(function() return v13:Init({ConfigurationSaving={Enabled=true,FolderName="DYU_HUB",FileName="Config"}});end);if ( not v14 or (type(v15)~="table") or (type(v15.CreateTab)~="function")) then return;end local v16=v15:CreateTab({Name="Event",Icon="person",ImageSource="Material",ShowTitle=true});local v17=781 -(162 + 618) ;local v18;local function v19() local v46,v47=pcall(function() local v100=0 + 0 ;local v101;local v102;while true do if (v100==(1 + 0)) then v18=v18 or require(v102:WaitForChild("EggCmds")) ;return v18.GetMaxHatch();end if (v100==(0 -0)) then v101=v1:WaitForChild("Library");v102=v101:WaitForChild("Client");v100=1 -0 ;end end end);if (v46 and (type(v47)=="number") and (v47>=(1 + 0))) then v17=math.floor(v47);elseif  not v46 then warn("[Auto Egg] Không đọc được EggCmds.GetMaxHatch(): "   .. tostring(v47) );end return v17;end task.spawn(function() local v48=1636 -(1373 + 263) ;while true do if (v48==0) then v19();while task.wait(1030 -(451 + 549) ) do v19();end break;end end end);task.spawn(function() while true do local v103=0;while true do if (v103==(0 + 0)) then pcall(function() local v154=0 -0 ;local v155;local v156;while true do if (v154==(1 -0)) then if (v156.Health>(1384 -(746 + 638))) then v156.Jump=true;end break;end if (v154==(0 + 0)) then v155=v2.Character or v2.CharacterAdded:Wait() ;v156=v155:FindFirstChildOfClass("Humanoid") or v155:WaitForChild("Humanoid") ;v154=1 -0 ;end end end);task.wait(641 -(218 + 123) );break;end end end end);local v20=false;local function v21() local v49=1581 -(1535 + 46) ;while true do if (v49==(0 + 0)) then if v20 then return;end v20=true;v49=1 + 0 ;end if (v49==(561 -(306 + 254))) then task.spawn(function() local v123=0;local v124;local v125;while true do if (v123==(1 + 1)) then v20=false;break;end if (v123==(0 -0)) then v124=game:GetService("ReplicatedStorage"):WaitForChild("Network");v125=v124:WaitForChild("CustomEggs_Hatch");v123=1468 -(899 + 568) ;end if ((1 + 0)==v123) then print("[Auto Egg] Đã bắt đầu; remote CustomEggs_Hatch đã tìm thấy.");while v4.AutoEgg and v20  do local v177=0;local v178;local v179;while true do if (v177==0) then v178,v179=pcall(function() local v209=0 -0 ;local v210;while true do if (v209==(603 -(268 + 335))) then v210=v19();v125:InvokeServer("af4dc46aa70442d8bd56e76df3dd76da",v210);break;end end end);if  not v178 then warn("[Auto Egg] Gọi CustomEggs_Hatch thất bại: "   .. tostring(v179) );task.wait(1);else task.wait(0.5);end break;end end end v123=292 -(60 + 230) ;end end end);break;end end end v16:CreateToggle({Name="Auto Egg",CurrentValue=v4.AutoEgg,Callback=function(v50) local v51=572 -(426 + 146) ;while true do if (v51==(1 + 0)) then if v50 then v21();else v20=false;end break;end if ((1456 -(282 + 1174))==v51) then v4.AutoEgg=v50;v5();v51=1;end end end});if v4.AutoEgg then v21();end local v22=false;local function v23() local v52=811 -(569 + 242) ;local v53;while true do if ((5 -3)==v52) then v53();task.spawn(function() while v4.AutoHatchWarBossTap and v22  do local v157=0 + 0 ;local v158;local v159;while true do if (v157==(1024 -(706 + 318))) then v158,v159=pcall(function() local v186=1251 -(721 + 530) ;local v187;local v188;local v189;local v190;local v191;local v192;local v193;while true do if (v186==(1275 -(945 + 326))) then v193:FireServer("HatchWar","HW_Boss_Tap","circle");break;end if (v186==(4 -2)) then v191=v190:FindFirstChild("LiveCircle");if (v191 and v191:IsA("ImageButton") and v191.Visible) then if (type(firesignal)=="function") then firesignal(v191.Activated);end end v186=3 + 0 ;end if (v186==(703 -(271 + 429))) then v192=game:GetService("ReplicatedStorage"):WaitForChild("Network");v193=v192:WaitForChild("Instancing_FireCustomFromClient");v186=4;end if (v186==0) then v187=game:GetService("Players").LocalPlayer;v188=v187:WaitForChild("PlayerGui");v186=1 + 0 ;end if (v186==(1501 -(1408 + 92))) then v189=v188:WaitForChild("_INSTANCES");v190=v189:WaitForChild("HatchWarBoss");v186=2;end end end);task.wait(1086.2 -(461 + 625) );break;end end end end);v52=1291 -(993 + 295) ;end if (v52==(1 + 2)) then task.spawn(function() local v126=0;local v127;local v128;while true do if (v126==(1171 -(418 + 753))) then v127=game:GetService("ReplicatedStorage"):WaitForChild("Network");v128=v127:WaitForChild("Instancing_InvokeCustomFromClient");v126=1 + 0 ;end if (1==v126) then while v4.AutoHatchWarBossTap and v22  do local v180=0;local v181;local v182;while true do if (v180==(0 + 0)) then v181,v182=pcall(function() v128:InvokeServer("HatchWar","HW_Boss_Start",2 + 4 );end);task.wait(0.5 + 0 );break;end end end break;end end end);task.spawn(function() while v4.AutoHatchWarBossTap and v22  do task.wait(5);if  not (v4.AutoHatchWarBossTap and v22) then break;end v53();end end);break;end if (v52==(529 -(406 + 123))) then if v22 then return;end v22=true;v52=1770 -(1749 + 20) ;end if (v52==(1 + 0)) then v53=nil;function v53() local v129,v130=pcall(function() local v160=game:GetService("Players").LocalPlayer;local v161=v160.Character or v160.CharacterAdded:Wait() ;local v162=v161:WaitForChild("HumanoidRootPart");v162.CFrame=CFrame.new(7626.8623046875,16.33778953552246,23303.595703125 -(1249 + 73) );end);end v52=2;end end end v16:CreateToggle({Name="Auto HW Boss Tap",CurrentValue=v4.AutoHatchWarBossTap,Callback=function(v54) local v55=0 + 0 ;while true do if (v55==1) then if v54 then v23();else v22=false;end break;end if (v55==(1145 -(466 + 679))) then v4.AutoHatchWarBossTap=v54;v5();v55=2 -1 ;end end end});if v4.AutoHatchWarBossTap then v23();end local v24=false;local v25={};local v26="451067eb4fc14e64bf64aa8f755dfe08";local v27={[2 -1 ]=Vector3.new(7489.35888671875,1919.386381149292 -(106 + 1794) ,6934.291015625 + 14983 ),[1 + 1 ]=Vector3.new(22101.86669921875 -14615 ,51.63698196411133 -32 ,22197.65234375 -(4 + 110) ),[587 -(57 + 527) ]=Vector3.new(7544.9912109375,19.636600494384766,21916.857421875),[1431 -(41 + 1386) ]=Vector3.new(7637.037109375 -(17 + 86) ,13.637348175048828 + 6 ,49249.875 -27165 ),[14 -9 ]=Vector3.new(7755.3935546875 -(122 + 44) ,19.636981964111328,21916.61328125),[10 -4 ]=Vector3.new(25136.2265625 -17559 ,19.636981964111328,17965.76171875 + 4118 ),[2 + 5 ]=Vector3.new(7635.36376953125,37.386701583862305 -18 ,21917.314453125),[73 -(30 + 35) ]=Vector3.new(5247.15966796875 + 2387 ,1276.6366004943848 -(1043 + 214) ,22084.72265625)};local v28={[1]={house="House1",indices={30 -22 ,26 -16 ,8}},[582 -(361 + 219) ]={house="House2",indices={327 -(53 + 267) ,419 -(15 + 398) }},[985 -(18 + 964) ]={house="House3",indices={5 + 3 ,4,8 + 1 }},[130 -(116 + 10) ]={house="House4",indices={7,10 -5 ,3 + 2 }},[5]={house="House5",indices={12 -7 ,1557 -(1126 + 425) ,39 -29 }},[1127 -(118 + 1003) ]={house="House6",modelModel=true,indices={379 -(142 + 235) ,58 -45 }},[2 + 5 ]={house="House7",indices={6,14 -6 }},[8 + 0 ]={house="House8",indices={11,3 + 2 ,3}}};local function v29(v56,v57) local v58=v56:FindFirstChild(v57.house);if  not v58 then return nil;end local v59=v58:FindFirstChild("Model");if  not v59 then return nil;end if v57.modelModel then v59=v59:FindFirstChild("Model");if  not v59 then return nil;end end for v104,v105 in ipairs(v57.indices) do local v106=0 + 0 ;local v107;while true do if (v106==(2 -1)) then if  not v59 then return nil;end break;end if (v106==0) then v107=v59:GetChildren();v59=v107[v105];v106=1;end end end return (v59:IsA("BasePart") and v59) or nil ;end local function v30() local v60=workspace:FindFirstChild("__THINGS");local v61=v60 and v60:FindFirstChild("__INSTANCE_CONTAINER") ;local v62=v61 and v61:FindFirstChild("Active") ;local v63=v62 and v62:FindFirstChild("HatchWar") ;local v64=v63 and v63:FindFirstChild("6 | Count's Manor") ;return v64 and v64:FindFirstChild("Houses") ,v63;end local function v31() local v65=0 -0 ;local v66;while true do if (v65==0) then v66=v30();if  not v66 then return;end v65=2 -1 ;end if (v65==1) then for v132,v133 in pairs(v28) do local v134=0;local v135;while true do if (v134==(0 + 0)) then v135=v29(v66,v133);if v135 then local v194=0;local v195;while true do if (v194==(0 -0)) then v195=v135.Color;v25[v132]= not ((v195.R==0) and (v195.G==0) and (v195.B==0));break;end end else v25[v132]=nil;end break;end end end break;end end end local function v32() local v67=0;local v68;local v69;local v70;while true do if (2==v67) then for v136,v137 in ipairs(v68) do if v137 then for v169,v170 in ipairs(v137:GetDescendants()) do local v171=(v170.Name==v26) or (v170:GetAttribute("UID")==v26) or (v170:GetAttribute("ItemUID")==v26) or (v170:GetAttribute("Id")==v26) ;if v171 then local v197=nil;if (v170:IsA("IntValue") or v170:IsA("NumberValue")) then v197=v70(v170.Value);end if (v197==nil) then v197=v70(v170:GetAttribute("Amount")) or v70(v170:GetAttribute("Count")) ;end if (v197==nil) then local v207=753 -(239 + 514) ;local v208;while true do if (v207==0) then v208=v170:FindFirstChild("Amount") or v170:FindFirstChild("Count") ;if (v208 and (v208:IsA("IntValue") or v208:IsA("NumberValue") or v208:IsA("StringValue"))) then v197=v70(v208.Value);end break;end end end if (v197~=nil) then v69=v197;break;end end end end if (v69~=nil) then break;end end return v69;end if (v67==(0 + 0)) then v68={v2,v2:FindFirstChild("PlayerGui")};v69=nil;v67=1 + 0 ;end if ((2 -1)==v67) then v70=nil;function v70(v138) local v139=0;while true do if ((1203 -(373 + 829))==v139) then return nil;end if (v139==(731 -(476 + 255))) then if (typeof(v138)=="number") then return math.max(1130 -(369 + 761) ,v138);end if (typeof(v138)=="string") then local v198=0;local v199;while true do if ((0 + 0)==v198) then v199=v138:gsub(",",""):match("%d+");return (v199 and tonumber(v199)) or nil ;end end end v139=1 -0 ;end end end v67=3 -1 ;end end end local function v33(v71,v72) local v73=v71 and v71:FindFirstChild("INTERACT") ;local v74=v73 and v73:FindFirstChild("Doors") ;local v75=v74 and v74:FindFirstChild(tostring(v72)) ;local v76=v75 and v75:FindFirstChild("HatchWarHouseBillboard") ;local v77=v76 and v76:FindFirstChild("HatchWarHouse") ;local v78=v77 and v77:FindFirstChild("Price") ;local v79=v78 and v78:FindFirstChild("Amount") ;if  not v79 then return nil;end local v80=tostring(v79.Text or "" ):gsub(",","");local v81=v80:match("%d+%.?%d*");return (v81 and tonumber(v81)) or nil ;end local function v34() for v108=239 -(64 + 174) ,8 do if (v25[v108]==false) then return v108;end end return nil;end local function v35() if v24 then return;end v24=true;task.spawn(function() local v109=game:GetService("ReplicatedStorage"):WaitForChild("Network");local v110=v109:WaitForChild("Instancing_InvokeCustomFromClient");local v111=nil;local v112=nil;local v113=false;while v4.AutoUnlock and v24  do local v114=0;local v115;local v116;while true do if (v114==2) then if v116 then local v172=0;local v173;local v174;local v175;while true do if (v172==(1 + 0)) then if ((v115~=nil) and (v175~=nil) and (v175<v115)) then local v214=0;local v215;local v216;local v217;local v218;while true do if ((0 -0)==v214) then print("[Auto Unlock] Nhà "   .. v116   .. " | giá: "   .. tostring(v175)   .. " | item: "   .. tostring(v115)   .. " | đang mở khóa" );v215=v2.Character or v2.CharacterAdded:Wait() ;v214=337 -(144 + 192) ;end if (v214==2) then v218=v27[v116];if v218 then local v235=0;local v236;while true do if (v235==(216 -(42 + 174))) then v236=pcall(function() v216.CFrame=CFrame.new(v218);end);if v236 then local v243=0 + 0 ;local v244;local v245;local v246;local v247;while true do if (v243==(2 + 0)) then pcall(function() local v248=0 + 0 ;local v249;local v250;while true do if (v248==(1504 -(363 + 1141))) then v249=v2.Character or v2.CharacterAdded:Wait() ;v250=v249:FindFirstChild("HumanoidRootPart") or v249:WaitForChild("HumanoidRootPart") ;v248=1;end if (v248==(1581 -(1183 + 397))) then v250.CFrame=v217;break;end end end);v246=os.clock();v243=8 -5 ;end if (v243==0) then task.wait(0.25);v244,v245=pcall(function() return v110:InvokeServer("HatchWar","HW_Doors_Unlock",v116);end);v243=1 + 0 ;end if (v243==3) then v247=false;repeat local v251=0 + 0 ;while true do if (v251==(1976 -(1913 + 62))) then v247=v25[v116]==true ;break;end if (v251==(0 + 0)) then task.wait(0.25);pcall(v31);v251=2 -1 ;end end until v247 or  not (v4.AutoUnlock and v24) or ((os.clock() -v246)>=5)  v243=4;end if (v243==(1934 -(565 + 1368))) then if  not v244 then warn("[Auto Unlock] Lệnh mở nhà "   .. v116   .. " gặp lỗi: "   .. tostring(v245) );end task.wait(0.25 -0 );v243=1663 -(1477 + 184) ;end if (v243==(5 -1)) then if v247 then print("[Auto Unlock] Nhà "   .. v116   .. " đã được xác nhận mở; chuyển sang quét nhà tiếp theo." );else local v252=0 + 0 ;while true do if (v252==(856 -(564 + 292))) then warn("[Auto Unlock] Chưa xác nhận được nhà "   .. v116   .. " đã mở. Sẽ quét lại, không spam lệnh liên tục." );task.wait(1 -0 );break;end end end break;end end end break;end end end break;end if ((2 -1)==v214) then v216=v215:FindFirstChild("HumanoidRootPart") or v215:WaitForChild("HumanoidRootPart") ;v217=v216.CFrame;v214=306 -(244 + 60) ;end end elseif ((v115~=nil) and (v175~=nil)) then local v221=0;local v222;while true do if (v221==0) then v222="Nhà "   .. v116   .. " | giá: "   .. tostring(v175)   .. " | item: "   .. tostring(v115)   .. " | chưa đủ điều kiện (cần giá < item)" ;if (v222~=v112) then local v240=0 + 0 ;while true do if (v240==(476 -(41 + 435))) then print("[Auto Unlock] "   .. v222 );v112=v222;break;end end end break;end end end break;end if (v172==(1001 -(938 + 63))) then v173,v174=v30();v175=v33(v174,v116);v172=1 + 0 ;end end elseif (v112~="all-unlocked") then print("[Auto Unlock] Không còn nhà nào được đánh dấu là đang khóa.");v112="all-unlocked";end task.wait(1125.2 -(936 + 189) );break;end if ((0 + 0)==v114) then pcall(v31);v115=v32();v114=1614 -(1565 + 48) ;end if (v114==1) then if (v115~=nil) then local v176=0;while true do if (v176==(0 + 0)) then if (v111~=v115) then local v219=1138 -(782 + 356) ;while true do if (v219==(267 -(176 + 91))) then print("[Auto Unlock] Item UID "   .. v26   .. " | số lượng: "   .. tostring(v115) );v111=v115;break;end end end v113=false;break;end end elseif  not v113 then local v200=0 -0 ;while true do if ((0 -0)==v200) then warn("[Auto Unlock] Chưa tìm thấy item UID "   .. v26   .. " trong Player/PlayerGui; cần xác minh đường dẫn inventory." );v113=true;break;end end end v116=v34();v114=2;end end end v24=false;end);end v16:CreateToggle({Name="Auto Unlock",CurrentValue=v4.AutoUnlock,Callback=function(v82) v4.AutoUnlock=v82;v5();if v82 then v35();else v24=false;end end});if v4.AutoUnlock then v35();end local v36=false;local function v37(v84,v85) local v86=1092 -(975 + 117) ;local v87;local v88;local v89;local v90;local v91;local v92;while true do if (v86==(1877 -(157 + 1718))) then if  not v92 then for v167,v168 in ipairs(v91:GetDescendants()) do if ((v168.Name=="Amount") and v168:IsA("TextLabel")) then v92=v168;break;end end end if (v92 and (v92:IsA("TextLabel") or v92:IsA("TextButton"))) then return tostring(v92.Text or "" );end return nil;end if (v86==(0 + 0)) then v87=v84 and v84:FindFirstChild("INTERACT") ;v88=v87 and v87:FindFirstChild("Doors") ;v89=v88 and v88:FindFirstChild(tostring(v85)) ;v90=v89 and v89:FindFirstChild("HatchWarHouseBillboard") ;v86=3 -2 ;end if (v86==(3 -2)) then v91=v90 and v90:FindFirstChild("HatchWarHouse") ;if  not v91 then return nil;end v92=v91:FindFirstChild("Amount");if  not v92 then local v164=1018 -(697 + 321) ;local v165;while true do if (v164==0) then v165=v91:FindFirstChild("Price");v92=v165 and v165:FindFirstChild("Amount") ;break;end end end v86=5 -3 ;end end end local function v38(v93) local v94=0 -0 ;local v95;local v96;while true do if (v94==(0 -0)) then v95=v27[v93];if  not v95 then return false;end v94=1;end if (v94==1) then v96=pcall(function() local v140=v2.Character or v2.CharacterAdded:Wait() ;local v141=v140:FindFirstChild("HumanoidRootPart") or v140:WaitForChild("HumanoidRootPart") ;v141.CFrame=CFrame.new(v95);end);return v96;end end end local function v39() local v97=0;while true do if (v97==(0 + 0)) then if v36 then return;end v36=true;v97=1 -0 ;end if (v97==(2 -1)) then task.spawn(function() local v143=1227 -(322 + 905) ;local v144;local v145;local v146;local v147;local v148;local v149;local v150;local v151;local v152;while true do if (v143==(611 -(602 + 9))) then v144=game:GetService("ReplicatedStorage"):WaitForChild("Network");v145=v144:WaitForChild("Instancing_InvokeCustomFromClient");v146=v144:WaitForChild("Instancing_FireCustomFromClient");v147=v2:FindFirstChild("PlayerGui");v143=1;end if (1==v143) then v148=v147 and v147:FindFirstChild("_INSTANCES") ;v149=v148 and v148:FindFirstChild("HatchWarBoss") ;v150=v149 and v149:FindFirstChild("LiveCircle") ;v151=nil;v143=1191 -(449 + 740) ;end if (v143==(874 -(826 + 46))) then v152=false;task.spawn(function() while v4.AutoKnockHouse and v36  do local v201=947 -(245 + 702) ;while true do if (v201==(0 -0)) then pcall(function() local v220=0;while true do if (v220==(0 + 0)) then if (v150 and v150:IsA("ImageButton") and v150.Visible and (type(firesignal)=="function")) then firesignal(v150.Activated);end v146:FireServer("HatchWar","HW_Boss_Tap","circle");break;end end end);task.wait(1898.2 -(260 + 1638) );break;end end end end);while v4.AutoKnockHouse and v36  do local v183,v184=v30();local v185={};for v202=1,8 do local v203=440 -(382 + 58) ;local v204;while true do if (v203==0) then v204=v37(v184,v202);if (v204 and string.find(string.lower(v204),"roll",3 -2 ,true)) then table.insert(v185,v202);end break;end end end if ( #v185>(0 + 0)) then local v206=0 -0 ;while true do if (v206==(2 -1)) then if v151 then pcall(function() local v229=0;local v230;local v231;while true do if ((1205 -(902 + 303))==v229) then v230=v2.Character or v2.CharacterAdded:Wait() ;v231=v230:FindFirstChild("HumanoidRootPart") or v230:WaitForChild("HumanoidRootPart") ;v229=1 -0 ;end if (v229==1) then v231.CFrame=v151;break;end end end);end break;end if (v206==(0 -0)) then if  not v151 then pcall(function() local v232=v2.Character or v2.CharacterAdded:Wait() ;local v233=v232:FindFirstChild("HumanoidRootPart") or v232:WaitForChild("HumanoidRootPart") ;v151=v233.CFrame;end);end for v223,v224 in ipairs(v185) do if  not (v4.AutoKnockHouse and v36) then break;end local v223,v225=v30();local v226=v37(v225,v224);if (v226 and string.find(string.lower(v226),"roll",1,true)) then if v38(v224) then local v237=0;local v238;local v239;while true do if (v237==1) then if  not v238 then warn("[Auto Knock House] Knock nhà "   .. v224   .. " lỗi: "   .. tostring(v239) );else print("[Auto Knock House] Đã gửi Knock nhà "   .. v224   .. " | Amount: "   .. v226 );end task.wait(0.15 + 0 );break;end if (v237==(1690 -(1121 + 569))) then task.wait(214.15 -(22 + 192) );v238,v239=pcall(function() return v145:InvokeServer("HatchWar","HW_Doors_Knock",v224);end);v237=1;end end end end end v206=684 -(483 + 200) ;end end end task.wait(1463.2 -(1404 + 59) );end v36=false;break;end end end);break;end end end v16:CreateToggle({Name="Auto Knock House",CurrentValue=v4.AutoKnockHouse,Callback=function(v98) local v99=0;while true do if ((0 -0)==v99) then v4.AutoKnockHouse=v98;v5();v99=1 -0 ;end if (v99==1) then if v98 then v39();else v36=false;end break;end end end});if v4.AutoKnockHouse then v39();end
+local function SaveConfig()
+    if type(writefile) ~= "function" then return false end
+    local ok = pcall(function()
+        writefile(ConfigFileName, HttpService:JSONEncode(EventSettings))
+    end)
+    return ok
+end
+
+local function LoadConfig()
+    if type(isfile) ~= "function" or type(readfile) ~= "function" then return end
+    local existsOk, exists = pcall(function()
+        return isfile(ConfigFileName)
+    end)
+    if not existsOk then return end
+    if not exists then
+        SaveConfig()
+        return
+    end
+
+    local readOk, data = pcall(function()
+        return HttpService:JSONDecode(readfile(ConfigFileName))
+    end)
+    if not readOk or type(data) ~= "table" then return end
+
+    for key, value in pairs(data) do
+        if EventSettings[key] ~= nil and type(value) == type(EventSettings[key]) then
+            EventSettings[key] = value
+        end
+    end
+end
+
+LoadConfig()
+LoadConfig()
+local isLoaded = false
+local bgUrl = "https://raw.githubusercontent.com/duyvip453/dyu-Hub/refs/heads/main/backgroud.lua?v=" .. math.random(1, 100000)
+local success, rawCode = pcall(function() return game:HttpGet(bgUrl) end)
+if not success or type(rawCode) ~= "string" or rawCode == "" then
+    return
+end
+local compileUI = loadstring(rawCode)
+if type(compileUI) ~= "function" then
+    return
+end
+local moduleOk, UIModule = pcall(compileUI)
+if not moduleOk or type(UIModule) ~= "table" or type(UIModule.Init) ~= "function" then
+    return
+end
+local initOk, Window = pcall(function()
+    return UIModule:Init({
+        ConfigurationSaving = {
+            Enabled = true,
+            FolderName = "DYU_HUB",
+            FileName = "Config"
+        }
+    })
+end)
+if not initOk or type(Window) ~= "table" or type(Window.CreateTab) ~= "function" then
+    return
+end
+local EventTab = Window:CreateTab({
+    Name = "Event",
+    Icon = "person",
+    ImageSource = "Material",
+    ShowTitle = true
+})
+
+-- [START] BuyMax: dùng EggCmds.GetMaxHatch và cập nhật cache mỗi 30 giây
+local CurrentMaxEggHatchAmount = 1
+local EggCmds
+
+local function RefreshMaxEggHatchAmount()
+    local ok, amount = pcall(function()
+        local library = ReplicatedStorage:WaitForChild("Library")
+        local client = library:WaitForChild("Client")
+        EggCmds = EggCmds or require(client:WaitForChild("EggCmds"))
+        return EggCmds.GetMaxHatch()
+    end)
+
+    if ok and type(amount) == "number" and amount >= 1 then
+        CurrentMaxEggHatchAmount = math.floor(amount)
+    elseif not ok then
+        warn("[Auto Egg] Không đọc được EggCmds.GetMaxHatch(): " .. tostring(amount))
+    end
+
+    return CurrentMaxEggHatchAmount
+end
+
+-- Cập nhật ngay khi khởi động, sau đó cứ 30 giây làm mới số trứng tối đa.
+task.spawn(function()
+    RefreshMaxEggHatchAmount()
+    while task.wait(30) do
+        RefreshMaxEggHatchAmount()
+    end
+end)
+-- [END] BuyMax: dùng EggCmds.GetMaxHatch và cập nhật cache mỗi 30 giây
+
+-- [START] Auto Knock House: tự nhảy mỗi 5 phút từ lúc event.lua khởi chạy
+task.spawn(function()
+    while true do
+        pcall(function()
+            local character = Player.Character or Player.CharacterAdded:Wait()
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+                or character:WaitForChild("Humanoid")
+            if humanoid.Health > 0 then
+                humanoid.Jump = true
+            end
+        end)
+
+        task.wait(300)
+    end
+end)
+-- [END] Auto Knock House: tự nhảy mỗi 5 phút từ lúc event.lua khởi chạy
+
+-- [START] Auto Egg: chỉ spam CustomEggs_Hatch theo GetMaxHatch()
+local AutoEggRunning = false
+
+local function StartAutoEgg()
+    if AutoEggRunning then return end
+    AutoEggRunning = true
+
+    task.spawn(function()
+        local network = game:GetService("ReplicatedStorage"):WaitForChild("Network")
+        local hatchRemote = network:WaitForChild("CustomEggs_Hatch")
+
+        print("[Auto Egg] Đã bắt đầu; remote CustomEggs_Hatch đã tìm thấy.")
+
+        while EventSettings.AutoEgg and AutoEggRunning do
+            local ok, err = pcall(function()
+                local amount = RefreshMaxEggHatchAmount()
+                hatchRemote:InvokeServer("af4dc46aa70442d8bd56e76df3dd76da", amount)
+            end)
+            if not ok then
+                warn("[Auto Egg] Gọi CustomEggs_Hatch thất bại: " .. tostring(err))
+                task.wait(1)
+            else
+                task.wait(0.5)
+            end
+        end
+
+        AutoEggRunning = false
+    end)
+end
+
+EventTab:CreateToggle({
+    Name = "Auto Egg",
+    CurrentValue = EventSettings.AutoEgg,
+    Callback = function(Value)
+        EventSettings.AutoEgg = Value
+        SaveConfig()
+
+        if Value then
+            StartAutoEgg()
+        else
+            AutoEggRunning = false
+        end
+    end
+})
+
+if EventSettings.AutoEgg then
+    StartAutoEgg()
+end
+-- [END] Auto Egg: chỉ spam CustomEggs_Hatch theo GetMaxHatch()
+-- [START] Auto HW Boss Tap
+local AutoTapRunning = false
+
+local function StartAutoHWTap()
+    if AutoTapRunning then return end
+    AutoTapRunning = true
+-- [START] Teleport tọa độ mục tiêu
+    local function TeleportToHWBossPosition()
+        local ok, err = pcall(function()
+            local player = game:GetService("Players").LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local root = character:WaitForChild("HumanoidRootPart")
+            root.CFrame = CFrame.new(7626.8623046875, 16.33778953552246, 21981.595703125)
+        end)
+    end
+
+    TeleportToHWBossPosition()
+-- [END] Teleport tọa độ mục tiêu
+-- [START] LiveCircle + HW_Boss_Tap
+    task.spawn(function()
+        while EventSettings.AutoHatchWarBossTap and AutoTapRunning do
+            local ok, err = pcall(function()
+                local player = game:GetService("Players").LocalPlayer
+                local playerGui = player:WaitForChild("PlayerGui")
+                local instances = playerGui:WaitForChild("_INSTANCES")
+                local hatchWarBoss = instances:WaitForChild("HatchWarBoss")
+                local button = hatchWarBoss:FindFirstChild("LiveCircle")
+
+                if button and button:IsA("ImageButton") and button.Visible then
+                    if type(firesignal) == "function" then
+                        firesignal(button.Activated)
+                    end
+                end
+
+                local network = game:GetService("ReplicatedStorage"):WaitForChild("Network")
+                local tapRemote = network:WaitForChild("Instancing_FireCustomFromClient")
+                tapRemote:FireServer("HatchWar", "HW_Boss_Tap", "circle")
+            end)
+
+            task.wait(0.2)
+        end
+    end)
+-- [END] LiveCircle + HW_Boss_Tap
+-- [START] HW_Boss_Start
+    task.spawn(function()
+        local network = game:GetService("ReplicatedStorage"):WaitForChild("Network")
+        local startRemote = network:WaitForChild("Instancing_InvokeCustomFromClient")
+
+        while EventSettings.AutoHatchWarBossTap and AutoTapRunning do
+            local ok, err = pcall(function()
+                startRemote:InvokeServer("HatchWar", "HW_Boss_Start", 6)
+            end)
+            task.wait(0.5)
+        end
+    end)
+-- [END] HW_Boss_Start
+-- [START] Teleport mỗi 5 giây
+    task.spawn(function()
+        while EventSettings.AutoHatchWarBossTap and AutoTapRunning do
+            task.wait(5)
+            if not (EventSettings.AutoHatchWarBossTap and AutoTapRunning) then
+                break
+            end
+
+            TeleportToHWBossPosition()
+        end
+    end)
+-- [END] Teleport mỗi 5 giây
+end
+
+EventTab:CreateToggle({
+    Name = "Auto HW Boss Tap",
+    CurrentValue = EventSettings.AutoHatchWarBossTap,
+    Callback = function(Value)
+        EventSettings.AutoHatchWarBossTap = Value
+        SaveConfig()
+
+        if Value then
+            StartAutoHWTap()
+        else
+            AutoTapRunning = false
+        end
+    end
+})
+
+if EventSettings.AutoHatchWarBossTap then
+    StartAutoHWTap()
+end
+-- [END] Auto HW Boss: LiveCircle + Tap remote + Boss Start remote
+
+-- [START] Auto Unlock: quét trạng thái, chờ đủ item, mở nhà đầu tiên còn khóa
+local AutoUnlockRunning = false
+local HouseUnlockStates = {}
+local UnlockItemUID = "451067eb4fc14e64bf64aa8f755dfe08"
+
+-- Tọa độ đứng tại từng căn nhà khi thực hiện Unlock
+local HouseUnlockPositions = {
+    [1] = Vector3.new(7489.35888671875, 19.386381149291992, 21917.291015625),
+    [2] = Vector3.new(7486.86669921875, 19.636981964111328, 22083.65234375),
+    [3] = Vector3.new(7544.9912109375, 19.636600494384766, 21916.857421875),
+    [4] = Vector3.new(7534.037109375, 19.637348175048828, 22084.875),
+    [5] = Vector3.new(7589.3935546875, 19.636981964111328, 21916.61328125),
+    [6] = Vector3.new(7577.2265625, 19.636981964111328, 22083.76171875),
+    [7] = Vector3.new(7635.36376953125, 19.386701583862305, 21917.314453125),
+    [8] = Vector3.new(7634.15966796875, 19.636600494384766, 22084.72265625),
+}
+
+local HouseColorPaths = {
+    [1] = { house = "House1", indices = {8, 10, 8} },
+    [2] = { house = "House2", indices = {7, 6} },
+    [3] = { house = "House3", indices = {8, 4, 9} },
+    [4] = { house = "House4", indices = {7, 5, 5} },
+    [5] = { house = "House5", indices = {5, 6, 10} },
+    [6] = { house = "House6", modelModel = true, indices = {2, 13} },
+    [7] = { house = "House7", indices = {6, 8} },
+    [8] = { house = "House8", indices = {11, 5, 3} },
+}
+
+local function ResolveHouseColorTarget(housesFolder, pathInfo)
+    local house = housesFolder:FindFirstChild(pathInfo.house)
+    if not house then return nil end
+
+    local current = house:FindFirstChild("Model")
+    if not current then return nil end
+
+    if pathInfo.modelModel then
+        current = current:FindFirstChild("Model")
+        if not current then return nil end
+    end
+
+    for _, childIndex in ipairs(pathInfo.indices) do
+        local children = current:GetChildren()
+        current = children[childIndex]
+        if not current then return nil end
+    end
+
+    return current:IsA("BasePart") and current or nil
+end
+
+local function GetHatchWarHouses()
+    local things = workspace:FindFirstChild("__THINGS")
+    local instances = things and things:FindFirstChild("__INSTANCE_CONTAINER")
+    local active = instances and instances:FindFirstChild("Active")
+    local hatchWar = active and active:FindFirstChild("HatchWar")
+    local manor = hatchWar and hatchWar:FindFirstChild("6 | Count's Manor")
+    return manor and manor:FindFirstChild("Houses"), hatchWar
+end
+
+local function ScanHouseUnlockStates()
+    local houses = GetHatchWarHouses()
+    if not houses then return end
+
+    for houseNumber, pathInfo in pairs(HouseColorPaths) do
+        local target = ResolveHouseColorTarget(houses, pathInfo)
+        if target then
+            local color = target.Color
+            HouseUnlockStates[houseNumber] = not (
+                color.R == 0 and color.G == 0 and color.B == 0
+            )
+        else
+            HouseUnlockStates[houseNumber] = nil
+        end
+    end
+end
+
+-- Đọc số lượng item theo UID từ các Value/Attribute có sẵn trong client.
+-- Nếu game lưu inventory ở một module riêng không xuất hiện trong các instance này,
+-- cần thay phần thân hàm bằng hàm đọc inventory chính xác của game.
+local function ReadUnlockItemAmount()
+    local roots = { Player, Player:FindFirstChild("PlayerGui") }
+    local bestAmount = nil
+
+    local function ParseAmount(value)
+        if typeof(value) == "number" then
+            return math.max(0, value)
+        end
+        if typeof(value) == "string" then
+            local digits = value:gsub(",", ""):match("%d+")
+            return digits and tonumber(digits) or nil
+        end
+        return nil
+    end
+
+    for _, root in ipairs(roots) do
+        if root then
+            for _, object in ipairs(root:GetDescendants()) do
+                local uidMatches = object.Name == UnlockItemUID
+                    or object:GetAttribute("UID") == UnlockItemUID
+                    or object:GetAttribute("ItemUID") == UnlockItemUID
+                    or object:GetAttribute("Id") == UnlockItemUID
+
+                if uidMatches then
+                    local amount = nil
+                    if object:IsA("IntValue") or object:IsA("NumberValue") then
+                        amount = ParseAmount(object.Value)
+                    end
+
+                    if amount == nil then
+                        amount = ParseAmount(object:GetAttribute("Amount"))
+                            or ParseAmount(object:GetAttribute("Count"))
+                    end
+
+                    if amount == nil then
+                        local amountObject = object:FindFirstChild("Amount")
+                            or object:FindFirstChild("Count")
+                        if amountObject and (amountObject:IsA("IntValue") or amountObject:IsA("NumberValue")
+                            or amountObject:IsA("StringValue")) then
+                            amount = ParseAmount(amountObject.Value)
+                        end
+                    end
+
+                    if amount ~= nil then
+                        bestAmount = amount
+                        break
+                    end
+                end
+            end
+        end
+        if bestAmount ~= nil then break end
+    end
+
+    return bestAmount
+end
+
+local function ReadHousePrice(hatchWar, houseNumber)
+    local interact = hatchWar and hatchWar:FindFirstChild("INTERACT")
+    local doors = interact and interact:FindFirstChild("Doors")
+    local door = doors and doors:FindFirstChild(tostring(houseNumber))
+    local billboard = door and door:FindFirstChild("HatchWarHouseBillboard")
+    local houseBillboard = billboard and billboard:FindFirstChild("HatchWarHouse")
+    local price = houseBillboard and houseBillboard:FindFirstChild("Price")
+    local amount = price and price:FindFirstChild("Amount")
+    if not amount then return nil end
+
+    local text = tostring(amount.Text or ""):gsub(",", "")
+    local numericText = text:match("%d+%.?%d*")
+    return numericText and tonumber(numericText) or nil
+end
+
+local function GetFirstLockedHouse()
+    for houseNumber = 1, 8 do
+        if HouseUnlockStates[houseNumber] == false then
+            return houseNumber
+        end
+    end
+    return nil
+end
+
+local function StartAutoUnlock()
+    if AutoUnlockRunning then return end
+    AutoUnlockRunning = true
+
+    task.spawn(function()
+        local network = game:GetService("ReplicatedStorage"):WaitForChild("Network")
+        local unlockRemote = network:WaitForChild("Instancing_InvokeCustomFromClient")
+        local lastPrintedAmount = nil
+        local lastPrintedStatus = nil
+        local printedNotFound = false
+
+        while EventSettings.AutoUnlock and AutoUnlockRunning do
+            -- Mỗi vòng đều quét lại cả 8 nhà để tìm căn bị khóa đầu tiên hiện tại.
+            pcall(ScanHouseUnlockStates)
+
+            local itemAmount = ReadUnlockItemAmount()
+            if itemAmount ~= nil then
+                if lastPrintedAmount ~= itemAmount then
+                    print("[Auto Unlock] Item UID " .. UnlockItemUID .. " | số lượng: " .. tostring(itemAmount))
+                    lastPrintedAmount = itemAmount
+                end
+                printedNotFound = false
+            elseif not printedNotFound then
+                warn("[Auto Unlock] Chưa tìm thấy item UID " .. UnlockItemUID .. " trong Player/PlayerGui; cần xác minh đường dẫn inventory.")
+                printedNotFound = true
+            end
+
+            local targetHouse = GetFirstLockedHouse()
+            if targetHouse then
+                local _, hatchWar = GetHatchWarHouses()
+                local housePrice = ReadHousePrice(hatchWar, targetHouse)
+
+                if itemAmount ~= nil and housePrice ~= nil and housePrice < itemAmount then
+                    print("[Auto Unlock] Nhà " .. targetHouse .. " | giá: " .. tostring(housePrice)
+                        .. " | item: " .. tostring(itemAmount) .. " | đang mở khóa")
+
+                    local character = Player.Character or Player.CharacterAdded:Wait()
+                    local root = character:FindFirstChild("HumanoidRootPart")
+                        or character:WaitForChild("HumanoidRootPart")
+                    local originalCFrame = root.CFrame
+                    local housePosition = HouseUnlockPositions[targetHouse]
+
+                    if housePosition then
+                        local teleported = pcall(function()
+                            root.CFrame = CFrame.new(housePosition)
+                        end)
+
+                        if teleported then
+                            task.wait(0.25)
+                            local unlockOk, unlockResult = pcall(function()
+                                return unlockRemote:InvokeServer("HatchWar", "HW_Doors_Unlock", targetHouse)
+                            end)
+                            if not unlockOk then
+                                warn("[Auto Unlock] Lệnh mở nhà " .. targetHouse .. " gặp lỗi: " .. tostring(unlockResult))
+                            end
+                            task.wait(0.25)
+
+                            -- Trở về vị trí ban đầu sau khi gửi lệnh mở khóa.
+                            pcall(function()
+                                local currentCharacter = Player.Character or Player.CharacterAdded:Wait()
+                                local currentRoot = currentCharacter:FindFirstChild("HumanoidRootPart")
+                                    or currentCharacter:WaitForChild("HumanoidRootPart")
+                                currentRoot.CFrame = originalCFrame
+                            end)
+
+                            -- Chờ trạng thái căn vừa xử lý cập nhật rồi mới quét chọn căn tiếp theo.
+                            -- Tránh gọi Unlock lặp liên tục vào cùng một căn khi server cập nhật chậm.
+                            local waitStarted = os.clock()
+                            local houseOpened = false
+                            repeat
+                                task.wait(0.25)
+                                pcall(ScanHouseUnlockStates)
+                                houseOpened = HouseUnlockStates[targetHouse] == true
+                            until houseOpened
+                                or not (EventSettings.AutoUnlock and AutoUnlockRunning)
+                                or os.clock() - waitStarted >= 5
+
+                            if houseOpened then
+                                print("[Auto Unlock] Nhà " .. targetHouse .. " đã được xác nhận mở; chuyển sang quét nhà tiếp theo.")
+                            else
+                                warn("[Auto Unlock] Chưa xác nhận được nhà " .. targetHouse .. " đã mở. Sẽ quét lại, không spam lệnh liên tục.")
+                                task.wait(1)
+                            end
+                        end
+                    end
+                elseif itemAmount ~= nil and housePrice ~= nil then
+                    -- Không dịch chuyển khi chưa đủ item; tiếp tục cập nhật giá và số lượng.
+                    local status = "Nhà " .. targetHouse .. " | giá: " .. tostring(housePrice)
+                        .. " | item: " .. tostring(itemAmount) .. " | chưa đủ điều kiện (cần giá < item)"
+                    if status ~= lastPrintedStatus then
+                        print("[Auto Unlock] " .. status)
+                        lastPrintedStatus = status
+                    end
+                end
+            else
+                if lastPrintedStatus ~= "all-unlocked" then
+                    print("[Auto Unlock] Không còn nhà nào được đánh dấu là đang khóa.")
+                    lastPrintedStatus = "all-unlocked"
+                end
+            end
+
+            task.wait(0.2)
+        end
+
+        AutoUnlockRunning = false
+    end)
+end
+
+EventTab:CreateToggle({
+    Name = "Auto Unlock",
+    CurrentValue = EventSettings.AutoUnlock,
+    Callback = function(Value)
+        EventSettings.AutoUnlock = Value
+        SaveConfig()
+
+        if Value then
+            StartAutoUnlock()
+        else
+            AutoUnlockRunning = false
+        end
+    end
+})
+
+if EventSettings.AutoUnlock then
+    StartAutoUnlock()
+end
+-- [END] Auto Unlock: quét trạng thái, chờ đủ item, mở nhà đầu tiên còn khóa
+
+-- [START] Auto Knock House: toggle quét Roll, knock nhà theo thứ tự và tap boss
+local AutoKnockHouseRunning = false
+
+local function ReadHouseRollText(hatchWar, houseNumber)
+    local interact = hatchWar and hatchWar:FindFirstChild("INTERACT")
+    local doors = interact and interact:FindFirstChild("Doors")
+    local door = doors and doors:FindFirstChild(tostring(houseNumber))
+    local billboard = door and door:FindFirstChild("HatchWarHouseBillboard")
+    local houseBillboard = billboard and billboard:FindFirstChild("HatchWarHouse")
+    if not houseBillboard then return nil end
+
+    -- Tìm Amount như đường dẫn giá; ưu tiên Amount trực tiếp, sau đó dò sâu.
+    local amountObject = houseBillboard:FindFirstChild("Amount")
+    if not amountObject then
+        local amountContainer = houseBillboard:FindFirstChild("Price")
+        amountObject = amountContainer and amountContainer:FindFirstChild("Amount")
+    end
+    if not amountObject then
+        for _, descendant in ipairs(houseBillboard:GetDescendants()) do
+            if descendant.Name == "Amount" and descendant:IsA("TextLabel") then
+                amountObject = descendant
+                break
+            end
+        end
+    end
+
+    if amountObject and (amountObject:IsA("TextLabel") or amountObject:IsA("TextButton")) then
+        return tostring(amountObject.Text or "")
+    end
+    return nil
+end
+
+local function TeleportToHouse(houseNumber)
+    local position = HouseUnlockPositions[houseNumber]
+    if not position then return false end
+    local ok = pcall(function()
+        local character = Player.Character or Player.CharacterAdded:Wait()
+        local root = character:FindFirstChild("HumanoidRootPart")
+            or character:WaitForChild("HumanoidRootPart")
+        root.CFrame = CFrame.new(position)
+    end)
+    return ok
+end
+
+local function StartAutoKnockHouse()
+    if AutoKnockHouseRunning then return end
+    AutoKnockHouseRunning = true
+
+    task.spawn(function()
+        local network = game:GetService("ReplicatedStorage"):WaitForChild("Network")
+        local invokeRemote = network:WaitForChild("Instancing_InvokeCustomFromClient")
+        local tapRemote = network:WaitForChild("Instancing_FireCustomFromClient")
+        local playerGui = Player:FindFirstChild("PlayerGui")
+        local instances = playerGui and playerGui:FindFirstChild("_INSTANCES")
+        local hatchWarBoss = instances and instances:FindFirstChild("HatchWarBoss")
+        local liveCircle = hatchWarBoss and hatchWarBoss:FindFirstChild("LiveCircle")
+        local originalCFrame = nil
+        local wasAwayFromHome = false
+
+        -- Chỉ chạy HW_Boss_Tap song song; không gọi HW_Boss_Start và không teleport đến boss.
+        task.spawn(function()
+            while EventSettings.AutoKnockHouse and AutoKnockHouseRunning do
+                pcall(function()
+                    if liveCircle and liveCircle:IsA("ImageButton") and liveCircle.Visible
+                        and type(firesignal) == "function" then
+                        firesignal(liveCircle.Activated)
+                    end
+                    tapRemote:FireServer("HatchWar", "HW_Boss_Tap", "circle")
+                end)
+                task.wait(0.2)
+            end
+        end)
+
+        while EventSettings.AutoKnockHouse and AutoKnockHouseRunning do
+            local _, hatchWar = GetHatchWarHouses()
+            local rollHouses = {}
+
+            -- Quét Amount của từng nhà; chỉ lấy text có chứa "roll", theo thứ tự nhà nhỏ trước.
+            for houseNumber = 1, 8 do
+                local amountText = ReadHouseRollText(hatchWar, houseNumber)
+                if amountText and string.find(string.lower(amountText), "roll", 1, true) then
+                    table.insert(rollHouses, houseNumber)
+                end
+            end
+
+            if #rollHouses > 0 then
+                if not originalCFrame then
+                    pcall(function()
+                        local character = Player.Character or Player.CharacterAdded:Wait()
+                        local root = character:FindFirstChild("HumanoidRootPart")
+                            or character:WaitForChild("HumanoidRootPart")
+                        originalCFrame = root.CFrame
+                    end)
+                end
+
+                for _, houseNumber in ipairs(rollHouses) do
+                    if not (EventSettings.AutoKnockHouse and AutoKnockHouseRunning) then break end
+
+                    -- Quét lại ngay trước khi knock để tránh knock nhà đã hết Roll.
+                    local _, currentHatchWar = GetHatchWarHouses()
+                    local currentText = ReadHouseRollText(currentHatchWar, houseNumber)
+                    if currentText and string.find(string.lower(currentText), "roll", 1, true) then
+                        if TeleportToHouse(houseNumber) then
+                            task.wait(0.15)
+                            local ok, result = pcall(function()
+                                return invokeRemote:InvokeServer("HatchWar", "HW_Doors_Knock", houseNumber)
+                            end)
+                            if not ok then
+                                warn("[Auto Knock House] Knock nhà " .. houseNumber .. " lỗi: " .. tostring(result))
+                            else
+                                print("[Auto Knock House] Đã gửi Knock nhà " .. houseNumber .. " | Amount: " .. currentText)
+                            end
+                            task.wait(0.15)
+                        end
+                    end
+                end
+
+                -- Sau khi knock hết các nhà đang Roll, trở về vị trí ban đầu.
+                if originalCFrame then
+                    pcall(function()
+                        local character = Player.Character or Player.CharacterAdded:Wait()
+                        local root = character:FindFirstChild("HumanoidRootPart")
+                            or character:WaitForChild("HumanoidRootPart")
+                        root.CFrame = originalCFrame
+                    end)
+                end
+            end
+
+            task.wait(0.2)
+        end
+
+        AutoKnockHouseRunning = false
+    end)
+end
+
+EventTab:CreateToggle({
+    Name = "Auto Knock House",
+    CurrentValue = EventSettings.AutoKnockHouse,
+    Callback = function(Value)
+        EventSettings.AutoKnockHouse = Value
+        SaveConfig()
+        if Value then
+            StartAutoKnockHouse()
+        else
+            AutoKnockHouseRunning = false
+        end
+    end
+})
+
+if EventSettings.AutoKnockHouse then
+    StartAutoKnockHouse()
+end
+-- [END] Auto Knock House: toggle quét Roll, knock nhà theo thứ tự và tap boss
