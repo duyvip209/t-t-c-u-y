@@ -3,22 +3,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Player = game:GetService("Players").LocalPlayer
 
 -- HW_BossScore tồn tại = đang đánh boss; không tồn tại = chưa đánh boss.
-local AutoBossPausedForHouseAction = false
-local AutoUnlockPending = false
-local AutoKnockPending = false
-local AutoHouseActionBusy = false
-local NoHouseWorkSince = nil
-local BossPathWasActive = false
-
 local function IsBossFightActive()
     local workspaceRoot = workspace:FindFirstChild("duycheck022")
     local head = workspaceRoot and workspaceRoot:FindFirstChild("Head")
     local score = head and head:FindFirstChild("HW_BossScore")
     return score ~= nil and score:FindFirstChild("HW_BossScore") ~= nil
-end
-
-local function IsHouseActionBlockingBoss()
-    return AutoBossPausedForHouseAction or AutoUnlockPending or AutoKnockPending or AutoHouseActionBusy
 end
 
 local ConfigFileName = "DYUHUB_Event_" .. game.PlaceId .. "_" .. Player.UserId .. ".json"
@@ -27,7 +16,6 @@ local EventSettings = {
     AutoHatchWarBossTap = false,
     AutoEgg = false,
     AutoJump = false,
-    AutoUnlock = false,
     AutoKnockHouse = false,
 }
 
@@ -143,73 +131,33 @@ task.spawn(function()
 end)
 -- [END] Auto Knock House: tự nhảy mỗi 5 phút từ lúc event.lua khởi chạy
 
--- Điều phối trạng thái boss và thao tác nhà.
-task.spawn(function()
-    while true do
-        local active = IsBossFightActive()
-        if active then
-            BossPathWasActive = true
-            NoHouseWorkSince = nil
-            AutoBossPausedForHouseAction = true
-        elseif AutoUnlockPending or AutoKnockPending or AutoHouseActionBusy then
-            AutoBossPausedForHouseAction = true
-            NoHouseWorkSince = nil
-        elseif BossPathWasActive or AutoBossPausedForHouseAction then
-            AutoBossPausedForHouseAction = true
-            NoHouseWorkSince = NoHouseWorkSince or os.clock()
-            if os.clock() - NoHouseWorkSince >= 1 then
-                AutoBossPausedForHouseAction = false
-                BossPathWasActive = false
-                NoHouseWorkSince = nil
-            end
-        end
-        task.wait(0.05)
-    end
-end)
-
--- [START] Auto Egg: teleport một lần, tìm ID trứng theo WorldPivot rồi hatch theo GetMaxHatch()
+-- [START] Auto Egg: gọi hatch trực tiếp, không teleport
 local AutoEggRunning = false
-local AutoEggTeleported = false
-
-local AutoEggTeleportPosition = Vector3.new(7536.7568359375, 16.33778953552246, 21966.52734375)
-local AutoEggWorldPivotPosition = Vector3.new(7537.25, 21.3670044, 21939.1797)
 local AutoEggEggId = nil
 
-local function TeleportToAutoEggOnce()
-    if AutoEggTeleported then return true end
-
-    local ok, err = pcall(function()
-        local character = Player.Character or Player.CharacterAdded:Wait()
-        local root = character:FindFirstChild("HumanoidRootPart")
-            or character:WaitForChild("HumanoidRootPart")
-        root.CFrame = CFrame.new(AutoEggTeleportPosition)
-    end)
-
-    if ok then
-        AutoEggTeleported = true
-        print("[Auto Egg] Đã teleport tới vị trí trứng một lần.")
-        return true
+local function GetAutoEggId()
+    local things = workspace:FindFirstChild("__THINGS")
+    local eggsFolder = things and things:FindFirstChild("CustomEggs")
+    if not eggsFolder then
+        return nil
     end
 
-    warn("[Auto Egg] Teleport tới trứng thất bại: " .. tostring(err))
-    return false
-end
+    -- Chọn egg có BottomLight gần nhân vật nhất, chỉ để xác định ID; không di chuyển nhân vật.
+    local character = Player.Character
+    local root = character and character:FindFirstChild("HumanoidRootPart")
+    local nearestEgg, nearestDistance = nil, math.huge
 
-local function FindAutoEggIdByWorldPivot()
-    local things = workspace:FindFirstChild("__THINGS")
-    local eggs = things and things:FindFirstChild("CustomEggs")
-    if not eggs then return nil end
-
-    for _, egg in ipairs(eggs:GetChildren()) do
-        if egg:IsA("Model") then
-            local pivot = egg.WorldPivot
-            if (pivot.Position - AutoEggWorldPivotPosition).Magnitude <= 0.15 then
-                return egg.Name
+    for _, egg in ipairs(eggsFolder:GetChildren()) do
+        local bottomLight = egg:FindFirstChild("BottomLight", true)
+        if bottomLight and bottomLight:IsA("BasePart") and root then
+            local distance = (bottomLight.Position - root.Position).Magnitude
+            if distance < nearestDistance then
+                nearestEgg, nearestDistance = egg, distance
             end
         end
     end
 
-    return nil
+    return nearestEgg
 end
 
 local function StartAutoEgg()
@@ -220,35 +168,29 @@ local function StartAutoEgg()
         local network = ReplicatedStorage:WaitForChild("Network")
         local hatchRemote = network:WaitForChild("CustomEggs_Hatch")
 
-        print("[Auto Egg] Đã tìm thấy remote CustomEggs_Hatch.")
-
-        -- Teleport trước, đúng một lần; sau đó mới xác định ID trứng của server hiện tại.
-        if not TeleportToAutoEggOnce() then
-            AutoEggRunning = false
-            return
-        end
-
         local startedAt = os.clock()
+        local egg
         repeat
-            AutoEggEggId = FindAutoEggIdByWorldPivot()
-            if AutoEggEggId then break end
+            egg = GetAutoEggId()
+            if egg then break end
             task.wait(0.25)
         until not (EventSettings.AutoEgg and AutoEggRunning) or os.clock() - startedAt >= 15
 
-        if not AutoEggEggId then
-            warn("[Auto Egg] Không tìm thấy trứng có WorldPivot tại " .. tostring(AutoEggWorldPivotPosition))
+        if not egg then
+            warn("[Auto Egg] Không tìm thấy egg để lấy ID.")
             AutoEggRunning = false
             return
         end
 
-        print("[Auto Egg] Đã xác định ID trứng theo WorldPivot: " .. AutoEggEggId)
+        AutoEggEggId = egg.Name
+        print("[Auto Egg] Egg ID: " .. tostring(AutoEggEggId) .. "; không teleport.")
 
         while EventSettings.AutoEgg and AutoEggRunning do
-            -- ID được dò từ server hiện tại; không dùng ID cố định giữa các server.
             local ok, err = pcall(function()
                 local amount = RefreshMaxEggHatchAmount()
                 hatchRemote:InvokeServer(AutoEggEggId, amount)
             end)
+
             if not ok then
                 warn("[Auto Egg] Gọi CustomEggs_Hatch thất bại: " .. tostring(err))
                 task.wait(1)
@@ -279,9 +221,11 @@ EventTab:CreateToggle({
 if EventSettings.AutoEgg then
     StartAutoEgg()
 end
--- [END] Auto Egg: teleport một lần, tìm ID trứng theo WorldPivot rồi hatch theo GetMaxHatch()
+-- [END] Auto Egg: gọi hatch trực tiếp, không teleport
 -- [START] Auto HW Boss Tap
 local AutoTapRunning = false
+-- Auto Knock có thể chặn vòng bắt đầu boss mới trong khi vẫn để Auto Tap chạy tới hết trận.
+local AutoBossStartSuppressed = false
 
 local function StartAutoHWTap()
     if AutoTapRunning then return end
@@ -296,19 +240,13 @@ local function StartAutoHWTap()
         end)
     end
 
-    if not IsBossFightActive() and not IsHouseActionBlockingBoss() then
+    if not IsBossFightActive() then
         TeleportToHWBossPosition()
     end
 -- [END] Teleport tọa độ mục tiêu
 -- [START] LiveCircle + HW_Boss_Tap
     task.spawn(function()
         while EventSettings.AutoHatchWarBossTap and AutoTapRunning do
-            -- Tap phải chạy khi boss đang hiện diện; chỉ tạm dừng lúc boss chưa active
-            -- nhưng coordinator đang nhường lượt cho thao tác nhà.
-            if not IsBossFightActive() and IsHouseActionBlockingBoss() then
-                task.wait(0.2)
-                continue
-            end
             local ok, err = pcall(function()
                 local player = game:GetService("Players").LocalPlayer
                 local playerGui = player:WaitForChild("PlayerGui")
@@ -337,7 +275,7 @@ local function StartAutoHWTap()
         local startRemote = network:WaitForChild("Instancing_InvokeCustomFromClient")
 
         while EventSettings.AutoHatchWarBossTap and AutoTapRunning do
-            if not IsBossFightActive() and not IsHouseActionBlockingBoss() then
+            if not AutoBossStartSuppressed and not IsBossFightActive() then
                 pcall(function()
                     startRemote:InvokeServer("HatchWar", "HW_Boss_Start", 6)
                 end)
@@ -354,7 +292,7 @@ local function StartAutoHWTap()
                 break
             end
 
-            if not IsBossFightActive() and not IsHouseActionBlockingBoss() then
+            if not IsBossFightActive() then
                 TeleportToHWBossPosition()
             end
         end
@@ -382,139 +320,181 @@ if EventSettings.AutoHatchWarBossTap then
 end
 -- [END] Auto HW Boss: LiveCircle + Tap remote + Boss Start remote
 
--- [START] Auto Unlock: ĐÃ VÔ HIỆU HÓA
--- Tính năng Auto Unlock được tắt hoàn toàn để tránh quét inventory/nhà và gọi remote.
--- Giữ toggle hiển thị nhưng luôn tắt để tương thích giao diện; không tạo task nền.
-EventSettings.AutoUnlock = false
-AutoUnlockPending = false
+-- [START] Auto Knock House: quét H1-H8, xử lý mọi nhà có giá chứa "roll".
+local AutoKnockRunning = false
+local HousePositions = {
+    [1] = Vector3.new(7489.3994140625, 19.386381149291992, 21917.48046875),
+    [2] = Vector3.new(7487.59326171875, 19.636981964111328, 22083.86328125),
+    [3] = Vector3.new(7545.201171875, 19.386701583862305, 21917.572265625),
+    [4] = Vector3.new(7534.21435546875, 19.637348175048828, 22083.759765625),
+    [5] = Vector3.new(7589.15625, 19.636981964111328, 21916.24609375),
+    [6] = Vector3.new(7577.74755859375, 19.636981964111328, 22084.13671875),
+    [7] = Vector3.new(7635.67431640625, 19.636600494384766, 21915.638671875),
+    [8] = Vector3.new(7634.23095703125, 19.636600494384766, 22084.3125),
+}
 
-EventTab:CreateToggle({
-    Name = "Auto Unlock (Disabled)",
-    CurrentValue = false,
-    Callback = function(_)
-        EventSettings.AutoUnlock = false
-        AutoUnlockPending = false
-        SaveConfig()
-        warn("[Auto Unlock] Tính năng đã bị vô hiệu hóa trong event.lua.")
-    end
-})
--- [END] Auto Unlock: ĐÃ VÔ HIỆU HÓA
-
--- [START] Auto Knock House: toggle quét Roll, knock nhà theo thứ tự và tap boss
-local AutoKnockHouseRunning = false
-
-local function ReadHouseRollText(hatchWar, houseNumber)
+local function GetOpenHouseNumbers()
+    local openHouses = {}
+    local things = workspace:FindFirstChild("__THINGS")
+    local container = things and things:FindFirstChild("__INSTANCE_CONTAINER")
+    local active = container and container:FindFirstChild("Active")
+    local hatchWar = active and active:FindFirstChild("HatchWar")
     local interact = hatchWar and hatchWar:FindFirstChild("INTERACT")
     local doors = interact and interact:FindFirstChild("Doors")
-    local door = doors and doors:FindFirstChild(tostring(houseNumber))
-    local billboard = door and door:FindFirstChild("HatchWarHouseBillboard")
-    local houseBillboard = billboard and billboard:FindFirstChild("HatchWarHouse")
-    if not houseBillboard then return nil end
 
-    -- Tìm Amount như đường dẫn giá; ưu tiên Amount trực tiếp, sau đó dò sâu.
-    local amountObject = houseBillboard:FindFirstChild("Amount")
-    if not amountObject then
-        local amountContainer = houseBillboard:FindFirstChild("Price")
-        amountObject = amountContainer and amountContainer:FindFirstChild("Amount")
+    if not doors then
+        warn("[Auto Knock] Không tìm thấy path INTERACT.Doors.")
+        return openHouses
     end
-    if not amountObject then
-        for _, descendant in ipairs(houseBillboard:GetDescendants()) do
-            if descendant.Name == "Amount" and descendant:IsA("TextLabel") then
-                amountObject = descendant
+
+    for houseNumber = 1, 8 do
+        local door = doors:FindFirstChild(tostring(houseNumber))
+        local billboard = door and door:FindFirstChild("HatchWarHouseBillboard")
+        local house = billboard and billboard:FindFirstChild("HatchWarHouse")
+        local price = house and house:FindFirstChild("Price")
+        local amount = price and price:FindFirstChild("Amount")
+        local text = ""
+
+        if amount then
+            if amount:IsA("TextLabel") or amount:IsA("TextButton") or amount:IsA("TextBox") then
+                text = amount.Text
+            else
+                local textOk, value = pcall(function() return amount.Text end)
+                if textOk and type(value) == "string" then
+                    text = value
+                end
+            end
+        end
+
+        if text:lower():find("roll", 1, true) then
+            table.insert(openHouses, houseNumber)
+        end
+    end
+
+    return openHouses
+end
+
+local function GetCharacterRoot()
+    local character = Player.Character or Player.CharacterAdded:Wait()
+    return character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart")
+end
+
+local function PauseAutoBossStart()
+    local wasEnabled = EventSettings.AutoHatchWarBossTap
+    -- Ngăn remote bắt đầu trận mới, nhưng vẫn cho vòng Auto Tap xử lý trận hiện tại.
+    AutoBossStartSuppressed = true
+
+    if IsBossFightActive() then
+        print("[Auto Knock] Đang có boss; chờ trận hiện tại kết thúc.")
+        repeat task.wait(0.2) until not IsBossFightActive() or not AutoKnockRunning
+    end
+
+    if not AutoKnockRunning then
+        AutoBossStartSuppressed = false
+        return false, wasEnabled
+    end
+
+    if wasEnabled then
+        EventSettings.AutoHatchWarBossTap = false
+        AutoTapRunning = false
+        SaveConfig()
+    end
+
+    -- Đợi 1 giây và xác nhận score path không còn tồn tại trước khi teleport.
+    task.wait(1)
+    if IsBossFightActive() then
+        warn("[Auto Knock] Score path vẫn tồn tại; chờ boss kết thúc trước khi Knock.")
+        repeat task.wait(0.2) until not IsBossFightActive() or not AutoKnockRunning
+    end
+
+    return AutoKnockRunning, wasEnabled
+end
+
+local function RestoreAutoBoss(wasEnabled)
+    AutoBossStartSuppressed = false
+    if wasEnabled then
+        EventSettings.AutoHatchWarBossTap = true
+        SaveConfig()
+        StartAutoHWTap()
+    end
+end
+
+local function ProcessOpenHouses(openHouses)
+    if #openHouses == 0 then
+        print("[Auto Knock] Không có nhà nào chứa 'roll'.")
+        return
+    end
+
+    local root = GetCharacterRoot()
+    local originalCFrame = root.CFrame
+    local wasBossEnabled = EventSettings.AutoHatchWarBossTap
+    local ready = PauseAutoBossStart()
+
+    if not ready then
+        RestoreAutoBoss(wasBossEnabled)
+        return
+    end
+
+    local network = ReplicatedStorage:WaitForChild("Network")
+    local knockRemote = network:WaitForChild("Instancing_InvokeCustomFromClient")
+
+    local ok, err = pcall(function()
+        for _, houseNumber in ipairs(openHouses) do
+            if not AutoKnockRunning or not EventSettings.AutoKnockHouse then
                 break
             end
+
+            local targetPosition = HousePositions[houseNumber]
+            if targetPosition then
+                root = GetCharacterRoot()
+                root.CFrame = CFrame.new(targetPosition)
+                task.wait(0.25)
+
+                -- Ghi rõ kết quả remote để phân biệt lỗi gọi hàm với server từ chối hành động.
+                print(string.format(
+                    "[Auto Knock] Gọi Knock: house=%d, position=(%.2f, %.2f, %.2f)",
+                    houseNumber, targetPosition.X, targetPosition.Y, targetPosition.Z
+                ))
+                local callOk, result = pcall(function()
+                    return knockRemote:InvokeServer("HatchWar", "HW_Doors_Knock", houseNumber)
+                end)
+
+                if callOk then
+                    print("[Auto Knock] Remote trả về cho nhà " .. tostring(houseNumber) .. ": " .. tostring(result))
+                else
+                    warn("[Auto Knock] Remote lỗi ở nhà " .. tostring(houseNumber) .. ": " .. tostring(result))
+                end
+                task.wait(0.75)
+            end
         end
-    end
-
-    if amountObject and (amountObject:IsA("TextLabel") or amountObject:IsA("TextButton")) then
-        return tostring(amountObject.Text or "")
-    end
-    return nil
-end
-
-local function TeleportToHouse(houseNumber)
-    local position = HouseUnlockPositions[houseNumber]
-    if not position then return false end
-    local ok = pcall(function()
-        local character = Player.Character or Player.CharacterAdded:Wait()
-        local root = character:FindFirstChild("HumanoidRootPart")
-            or character:WaitForChild("HumanoidRootPart")
-        root.CFrame = CFrame.new(position)
     end)
-    return ok
+
+    -- Luôn cố gắng đưa nhân vật về vị trí ban đầu sau khi xử lý.
+    pcall(function()
+        local currentRoot = GetCharacterRoot()
+        currentRoot.CFrame = originalCFrame
+    end)
+
+    RestoreAutoBoss(wasBossEnabled)
+
+    if not ok then
+        warn("[Auto Knock] Lỗi khi xử lý nhà: " .. tostring(err))
+    end
 end
 
-local function StartAutoKnockHouse()
-    if AutoKnockHouseRunning then return end
-    AutoKnockHouseRunning = true
+local function StartAutoKnock()
+    if AutoKnockRunning then return end
+    AutoKnockRunning = true
 
     task.spawn(function()
-        local network = ReplicatedStorage:WaitForChild("Network")
-        local invokeRemote = network:WaitForChild("Instancing_InvokeCustomFromClient")
-        local originalCFrame = nil
-
-        while EventSettings.AutoKnockHouse and AutoKnockHouseRunning do
-            local _, hatchWar = GetHatchWarHouses()
-            local rollHouses = {}
-            for houseNumber = 1, 8 do
-                local amountText = ReadHouseRollText(hatchWar, houseNumber)
-                if amountText and string.find(string.lower(amountText), "roll", 1, true) then
-                    table.insert(rollHouses, houseNumber)
-                end
+        while AutoKnockRunning and EventSettings.AutoKnockHouse do
+            local openHouses = GetOpenHouseNumbers()
+            if #openHouses > 0 then
+                ProcessOpenHouses(openHouses)
             end
-            AutoKnockPending = #rollHouses > 0 and EventSettings.AutoKnockHouse and AutoKnockHouseRunning
-
-            if #rollHouses > 0 and not IsBossFightActive() and not AutoHouseActionBusy
-                and not (EventSettings.AutoUnlock and AutoUnlockPending) then
-                AutoHouseActionBusy = true
-                AutoBossPausedForHouseAction = true
-                if not originalCFrame then
-                    pcall(function()
-                        local ch = Player.Character or Player.CharacterAdded:Wait()
-                        local rt = ch:FindFirstChild("HumanoidRootPart") or ch:WaitForChild("HumanoidRootPart")
-                        originalCFrame = rt.CFrame
-                    end)
-                end
-
-                for _, houseNumber in ipairs(rollHouses) do
-                    if not AutoKnockHouseRunning or IsBossFightActive() then break end
-                    local _, currentHatchWar = GetHatchWarHouses()
-                    local currentText = ReadHouseRollText(currentHatchWar, houseNumber)
-                    if currentText and string.find(string.lower(currentText), "roll", 1, true)
-                        and not IsBossFightActive() then
-                        local teleported = TeleportToHouse(houseNumber)
-                        if teleported then
-                            task.wait(0.15)
-                            if IsBossFightActive() then break end
-                            local ok, result = pcall(function()
-                                if IsBossFightActive() then return end
-                                return invokeRemote:InvokeServer("HatchWar", "HW_Doors_Knock", houseNumber)
-                            end)
-                            if not ok then
-                                warn("[Auto Knock House] Knock nhà " .. houseNumber .. " lỗi: " .. tostring(result))
-                            else
-                                print("[Auto Knock House] Đã gửi Knock nhà " .. houseNumber .. " | Amount: " .. currentText)
-                            end
-                            task.wait(0.15)
-                        end
-                    end
-                end
-
-                if originalCFrame and not IsBossFightActive() then
-                    pcall(function()
-                        local ch = Player.Character or Player.CharacterAdded:Wait()
-                        local rt = ch:FindFirstChild("HumanoidRootPart") or ch:WaitForChild("HumanoidRootPart")
-                        if not IsBossFightActive() then rt.CFrame = originalCFrame end
-                    end)
-                end
-                AutoHouseActionBusy = false
-                AutoBossPausedForHouseAction = false
-            end
-
-            task.wait(0.2)
+            task.wait(5)
         end
-        AutoKnockPending = false
-        AutoKnockHouseRunning = false
+        AutoKnockRunning = false
     end)
 end
 
@@ -524,9 +504,15 @@ EventTab:CreateToggle({
     Callback = function(Value)
         EventSettings.AutoKnockHouse = Value
         SaveConfig()
-        if Value then StartAutoKnockHouse() else AutoKnockHouseRunning = false end
+        if Value then
+            StartAutoKnock()
+        else
+            AutoKnockRunning = false
+        end
     end
 })
 
-if EventSettings.AutoKnockHouse then StartAutoKnockHouse() end
--- [END] Auto Knock House: toggle quét Roll, knock nhà theo thứ tự và tap boss
+if EventSettings.AutoKnockHouse then
+    StartAutoKnock()
+end
+-- [END] Auto Knock House
