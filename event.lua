@@ -63,7 +63,6 @@ local function LoadConfig()
 end
 
 LoadConfig()
-LoadConfig()
 local isLoaded = false
 local bgUrl = "https://raw.githubusercontent.com/duyvip453/dyu-Hub/refs/heads/main/backgroud.lua?v=" .. math.random(1, 100000)
 local success, rawCode = pcall(function() return game:HttpGet(bgUrl) end)
@@ -304,7 +303,9 @@ local function StartAutoHWTap()
 -- [START] LiveCircle + HW_Boss_Tap
     task.spawn(function()
         while EventSettings.AutoHatchWarBossTap and AutoTapRunning do
-            if IsBossFightActive() or IsHouseActionBlockingBoss() then
+            -- Tap phải chạy khi boss đang hiện diện; chỉ tạm dừng lúc boss chưa active
+            -- nhưng coordinator đang nhường lượt cho thao tác nhà.
+            if not IsBossFightActive() and IsHouseActionBlockingBoss() then
                 task.wait(0.2)
                 continue
             end
@@ -381,265 +382,23 @@ if EventSettings.AutoHatchWarBossTap then
 end
 -- [END] Auto HW Boss: LiveCircle + Tap remote + Boss Start remote
 
--- [START] Auto Unlock: quét trạng thái, chờ đủ item, mở nhà đầu tiên còn khóa
-local AutoUnlockRunning = false
-local HouseUnlockStates = {}
-local UnlockItemUID = "451067eb4fc14e64bf64aa8f755dfe08"
-
--- Tọa độ đứng tại từng căn nhà khi thực hiện Unlock
-local HouseUnlockPositions = {
-    [1] = Vector3.new(7489.35888671875, 19.386381149291992, 21917.291015625),
-    [2] = Vector3.new(7486.86669921875, 19.636981964111328, 22083.65234375),
-    [3] = Vector3.new(7544.9912109375, 19.636600494384766, 21916.857421875),
-    [4] = Vector3.new(7534.037109375, 19.637348175048828, 22084.875),
-    [5] = Vector3.new(7589.3935546875, 19.636981964111328, 21916.61328125),
-    [6] = Vector3.new(7577.2265625, 19.636981964111328, 22083.76171875),
-    [7] = Vector3.new(7635.36376953125, 19.386701583862305, 21917.314453125),
-    [8] = Vector3.new(7634.15966796875, 19.636600494384766, 22084.72265625),
-}
-
-local HouseColorPaths = {
-    [1] = { house = "House1", indices = {8, 10, 8} },
-    [2] = { house = "House2", indices = {7, 6} },
-    [3] = { house = "House3", indices = {8, 4, 9} },
-    [4] = { house = "House4", indices = {7, 5, 5} },
-    [5] = { house = "House5", indices = {5, 6, 10} },
-    [6] = { house = "House6", modelModel = true, indices = {2, 13} },
-    [7] = { house = "House7", indices = {6, 8} },
-    [8] = { house = "House8", indices = {11, 5, 3} },
-}
-
-local function ResolveHouseColorTarget(housesFolder, pathInfo)
-    local house = housesFolder:FindFirstChild(pathInfo.house)
-    if not house then return nil end
-
-    local current = house:FindFirstChild("Model")
-    if not current then return nil end
-
-    if pathInfo.modelModel then
-        current = current:FindFirstChild("Model")
-        if not current then return nil end
-    end
-
-    for _, childIndex in ipairs(pathInfo.indices) do
-        local children = current:GetChildren()
-        current = children[childIndex]
-        if not current then return nil end
-    end
-
-    return current:IsA("BasePart") and current or nil
-end
-
-local function GetHatchWarHouses()
-    local things = workspace:FindFirstChild("__THINGS")
-    local instances = things and things:FindFirstChild("__INSTANCE_CONTAINER")
-    local active = instances and instances:FindFirstChild("Active")
-    local hatchWar = active and active:FindFirstChild("HatchWar")
-    local manor = hatchWar and hatchWar:FindFirstChild("6 | Count's Manor")
-    return manor and manor:FindFirstChild("Houses"), hatchWar
-end
-
-local function ScanHouseUnlockStates()
-    local houses = GetHatchWarHouses()
-    if not houses then return end
-
-    for houseNumber, pathInfo in pairs(HouseColorPaths) do
-        local target = ResolveHouseColorTarget(houses, pathInfo)
-        if target then
-            local color = target.Color
-            HouseUnlockStates[houseNumber] = not (
-                color.R == 0 and color.G == 0 and color.B == 0
-            )
-        else
-            HouseUnlockStates[houseNumber] = nil
-        end
-    end
-end
-
--- Đọc số lượng item theo UID từ các Value/Attribute có sẵn trong client.
--- Nếu game lưu inventory ở một module riêng không xuất hiện trong các instance này,
--- cần thay phần thân hàm bằng hàm đọc inventory chính xác của game.
-local function ReadUnlockItemAmount()
-    local roots = { Player, Player:FindFirstChild("PlayerGui") }
-    local bestAmount = nil
-
-    local function ParseAmount(value)
-        if typeof(value) == "number" then
-            return math.max(0, value)
-        end
-        if typeof(value) == "string" then
-            local digits = value:gsub(",", ""):match("%d+")
-            return digits and tonumber(digits) or nil
-        end
-        return nil
-    end
-
-    for _, root in ipairs(roots) do
-        if root then
-            for _, object in ipairs(root:GetDescendants()) do
-                local uidMatches = object.Name == UnlockItemUID
-                    or object:GetAttribute("UID") == UnlockItemUID
-                    or object:GetAttribute("ItemUID") == UnlockItemUID
-                    or object:GetAttribute("Id") == UnlockItemUID
-
-                if uidMatches then
-                    local amount = nil
-                    if object:IsA("IntValue") or object:IsA("NumberValue") then
-                        amount = ParseAmount(object.Value)
-                    end
-
-                    if amount == nil then
-                        amount = ParseAmount(object:GetAttribute("Amount"))
-                            or ParseAmount(object:GetAttribute("Count"))
-                    end
-
-                    if amount == nil then
-                        local amountObject = object:FindFirstChild("Amount")
-                            or object:FindFirstChild("Count")
-                        if amountObject and (amountObject:IsA("IntValue") or amountObject:IsA("NumberValue")
-                            or amountObject:IsA("StringValue")) then
-                            amount = ParseAmount(amountObject.Value)
-                        end
-                    end
-
-                    if amount ~= nil then
-                        bestAmount = amount
-                        break
-                    end
-                end
-            end
-        end
-        if bestAmount ~= nil then break end
-    end
-
-    return bestAmount
-end
-
-local function ReadHousePrice(hatchWar, houseNumber)
-    local interact = hatchWar and hatchWar:FindFirstChild("INTERACT")
-    local doors = interact and interact:FindFirstChild("Doors")
-    local door = doors and doors:FindFirstChild(tostring(houseNumber))
-    local billboard = door and door:FindFirstChild("HatchWarHouseBillboard")
-    local houseBillboard = billboard and billboard:FindFirstChild("HatchWarHouse")
-    local price = houseBillboard and houseBillboard:FindFirstChild("Price")
-    local amount = price and price:FindFirstChild("Amount")
-    if not amount then return nil end
-
-    local text = tostring(amount.Text or ""):gsub(",", "")
-    local numericText = text:match("%d+%.?%d*")
-    return numericText and tonumber(numericText) or nil
-end
-
-local function GetFirstLockedHouse()
-    for houseNumber = 1, 8 do
-        if HouseUnlockStates[houseNumber] == false then
-            return houseNumber
-        end
-    end
-    return nil
-end
-
-local function StartAutoUnlock()
-    if AutoUnlockRunning then return end
-    AutoUnlockRunning = true
-
-    task.spawn(function()
-        local network = ReplicatedStorage:WaitForChild("Network")
-        local unlockRemote = network:WaitForChild("Instancing_InvokeCustomFromClient")
-        local lastPrintedAmount, lastPrintedStatus, printedNotFound = nil, nil, false
-
-        while EventSettings.AutoUnlock and AutoUnlockRunning do
-            -- Quét luôn cả khi boss hoạt động; chỉ hành động nhà khi được cấp khóa.
-            pcall(ScanHouseUnlockStates)
-            local itemAmount = ReadUnlockItemAmount()
-            if itemAmount ~= nil then
-                if lastPrintedAmount ~= itemAmount then
-                    print("[Auto Unlock] Item UID " .. UnlockItemUID .. " | số lượng: " .. tostring(itemAmount))
-                    lastPrintedAmount = itemAmount
-                end
-                printedNotFound = false
-            elseif not printedNotFound then
-                warn("[Auto Unlock] Chưa tìm thấy item UID " .. UnlockItemUID .. " trong Player/PlayerGui; cần xác minh đường dẫn inventory.")
-                printedNotFound = true
-            end
-
-            local targetHouse = GetFirstLockedHouse()
-            local _, hatchWar = GetHatchWarHouses()
-            local housePrice = targetHouse and ReadHousePrice(hatchWar, targetHouse) or nil
-            local eligible = targetHouse ~= nil and itemAmount ~= nil and housePrice ~= nil and housePrice < itemAmount
-            AutoUnlockPending = eligible and EventSettings.AutoUnlock and AutoUnlockRunning
-
-            if eligible and not IsBossFightActive() and not AutoHouseActionBusy
-                and not (EventSettings.AutoKnockHouse and AutoKnockPending) then
-                AutoHouseActionBusy = true
-                AutoBossPausedForHouseAction = true
-                local character = Player.Character or Player.CharacterAdded:Wait()
-                local root = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart")
-                local originalCFrame = root.CFrame
-                local housePosition = HouseUnlockPositions[targetHouse]
-
-                if housePosition and not IsBossFightActive() then
-                    local teleported = pcall(function()
-                        if IsBossFightActive() then return end
-                        root.CFrame = CFrame.new(housePosition)
-                    end)
-                    if teleported and not IsBossFightActive() then
-                        task.wait(0.25)
-                        if not IsBossFightActive() then
-                            local ok, result = pcall(function()
-                                if IsBossFightActive() then return end
-                                return unlockRemote:InvokeServer("HatchWar", "HW_Doors_Unlock", targetHouse)
-                            end)
-                            if not ok then warn("[Auto Unlock] Lệnh mở nhà " .. targetHouse .. " lỗi: " .. tostring(result)) end
-                            task.wait(0.25)
-                            if not IsBossFightActive() then
-                                pcall(function()
-                                    local ch = Player.Character or Player.CharacterAdded:Wait()
-                                    local rt = ch:FindFirstChild("HumanoidRootPart") or ch:WaitForChild("HumanoidRootPart")
-                                    if not IsBossFightActive() then rt.CFrame = originalCFrame end
-                                end)
-                            end
-                            local started = os.clock()
-                            local opened = false
-                            repeat
-                                task.wait(0.25)
-                                pcall(ScanHouseUnlockStates)
-                                opened = HouseUnlockStates[targetHouse] == true
-                            until opened or not AutoUnlockRunning or os.clock() - started >= 5
-                            if opened then
-                                print("[Auto Unlock] Nhà " .. targetHouse .. " đã mở; tiếp tục quét.")
-                            else
-                                warn("[Auto Unlock] Chưa xác nhận nhà " .. targetHouse .. " đã mở.")
-                            end
-                        end
-                    end
-                end
-                AutoHouseActionBusy = false
-                AutoBossPausedForHouseAction = false
-            elseif targetHouse and itemAmount ~= nil and housePrice ~= nil and housePrice >= itemAmount then
-                local status = "Nhà " .. targetHouse .. " | giá: " .. tostring(housePrice) .. " | item: " .. tostring(itemAmount) .. " | chưa đủ điều kiện"
-                if status ~= lastPrintedStatus then print("[Auto Unlock] " .. status); lastPrintedStatus = status end
-            end
-
-            task.wait(0.2)
-        end
-        AutoUnlockPending = false
-        AutoUnlockRunning = false
-    end)
-end
+-- [START] Auto Unlock: ĐÃ VÔ HIỆU HÓA
+-- Tính năng Auto Unlock được tắt hoàn toàn để tránh quét inventory/nhà và gọi remote.
+-- Giữ toggle hiển thị nhưng luôn tắt để tương thích giao diện; không tạo task nền.
+EventSettings.AutoUnlock = false
+AutoUnlockPending = false
 
 EventTab:CreateToggle({
-    Name = "Auto Unlock",
-    CurrentValue = EventSettings.AutoUnlock,
-    Callback = function(Value)
-        EventSettings.AutoUnlock = Value
+    Name = "Auto Unlock (Disabled)",
+    CurrentValue = false,
+    Callback = function(_)
+        EventSettings.AutoUnlock = false
+        AutoUnlockPending = false
         SaveConfig()
-        if Value then StartAutoUnlock() else AutoUnlockRunning = false end
+        warn("[Auto Unlock] Tính năng đã bị vô hiệu hóa trong event.lua.")
     end
 })
-
-if EventSettings.AutoUnlock then StartAutoUnlock() end
--- [END] Auto Unlock: quét trạng thái, chờ đủ item, mở nhà đầu tiên còn khóa
+-- [END] Auto Unlock: ĐÃ VÔ HIỆU HÓA
 
 -- [START] Auto Knock House: toggle quét Roll, knock nhà theo thứ tự và tap boss
 local AutoKnockHouseRunning = false
